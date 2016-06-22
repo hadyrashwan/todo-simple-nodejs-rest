@@ -1,22 +1,11 @@
 var express = require('express')
+var bodyParser=require('body-parser')
 var app=express()
 var PORT= process.env.PORT || 3000
+app.use(bodyParser.json())
 
-var todos=[{
-	id:1,
-	description:'study node',
-	completed:false
-
-},{
-	id:2,
-	description:'study mongo',
-	completed:false
-},
-{
-	id:3,
-	description:'see whats next',
-	completed:true
-}]
+var todos=[]
+var todoIdNext=1
 
 app.get('/todos/:id',function(req,res){
 	//res.send('todos id is : ' +req.params.id)
@@ -36,6 +25,17 @@ app.get('/',function(req,res){
 app.get('/todos',function(req,res){
 	res.json(todos)
 })
+
+app.post('/todos',function(req,res){
+	var todoItem=req.body
+	todoItem.id=todoIdNext
+	todos.push(todoItem)
+	console.log(todos[todoIdNext-1])
+	todoIdNext++
+	res.send('item with description : '+todos[todoIdNext-2].description+' \n and id : '+todos[todoIdNext-2].id +' has been added')
+
+})
+
 app.listen(PORT,function(){
 	console.log('running on port : ',PORT)
 })
