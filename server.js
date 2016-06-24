@@ -68,18 +68,23 @@ app.get('/todos', function(req, res) {
 
 app.delete('/todos/:id', function(req, res) {
     var todoId2 = parseInt(req.params.id, 10)
-        // console.log(todoId )
-    var isFound2 = _.findWhere(todos, {
-        id: todoId2
+
+
+    db.todo.destroy({
+        where: {
+            id: todoId2
+        }
+    }).then(function(numberOfItems) {
+    	  if(numberOfItems ===0)
+    		return res.status(404).send('the id isnt found')
+        res.send(numberOfItems+" items has been  deleted!")
+    }, function(e) {
+        console.log(e)
+        res.status(404).send(e)
+    }).catch(function(e) {
+        console.log(e)
+        res.status(500).send(e)
     })
-    if (isFound2) {
-        todos = _.without(todos, isFound2)
-        console.log("todo with id : " + isFound2.id + " is deleted")
-        return res.send("todo with id : " + isFound2.id + " is deleted")
-    } else {
-        console.log("Iteam with id :" + todoId2 + " wasnt found ")
-        res.status(404).send("Iteam wasn't found")
-    }
 })
 
 app.post('/todos', function(req, res) {
@@ -95,6 +100,7 @@ app.post('/todos', function(req, res) {
 
 
 })
+
 
 app.put('/todos/:id', function(req, res) {
     //var body = req.body
