@@ -30,6 +30,21 @@ app.get('/todos/:id',function(req,res){
 
 app.get('/todos',function(req,res){
 	res.json(todos)
+	console.log("get all todo request ")
+})
+
+app.delete('/todos/:id',function(req,res){
+	var  todoId2=parseInt(req.params.id,10)
+	// console.log(todoId )
+	var isFound2=_.findWhere(todos,{id:todoId2})
+	if(isFound2){
+	 todos=_.without(todos,isFound2)
+	 console.log("todo with id : "+isFound2.id +" is deleted")
+	return res.send("todo with id : "+isFound2.id +" is deleted")
+	}else{
+		console.log("Iteam with id :"+todoId2+" wasnt found ")
+		res.status(404).send("Iteam wasn't found")
+	}
 })
 
 app.post('/todos',function(req,res){
@@ -43,9 +58,37 @@ app.post('/todos',function(req,res){
 	var todoItem=body
 	todoItem.id=todoIdNext
 	todos.push(todoItem)
-	console.log(todos[todoIdNext-1])
 	todoIdNext++
+	console.log('item with description : '+todos[todoIdNext-2].description+'  and id : '+todos[todoIdNext-2].id +' has been added')
 	res.send('item with description : '+todos[todoIdNext-2].description+' \n and id : '+todos[todoIdNext-2].id +' has been added')
+})
+
+app.put('/todos/:id',function(req,res){
+	var body=req.body
+	var  todoId3=parseInt(req.params.id,10)
+	var isFound3=_.findWhere(todos,{id:todoId3})
+	body=_.pick(body,"description", "completed")
+	validAttributes={}
+	if(!isFound3){
+		return res.status(404).send("no match found")
+	}
+	if(body.hasOwnProperty("completed") && _.isBoolean(body.completed)){
+
+		 validAttributes.completed=body.completed
+	}
+		else if(body.hasOwnProperty("completed")){
+			 return res.status(400).send()
+		}
+
+	if(body.hasOwnProperty("description") && _.isString(body.description) &&  body.description.trim().length  >0 ){
+		validAttributes.description=body.description
+	}else if(body.hasOwnProperty('description')){
+		return	res.status(400).send()
+	}
+
+	_.extend(isFound3,validAttributes)
+	console.log("item with  id : "+isFound3.id +"has been updated" )
+	return res.json(isFound3)
 
 })
 
