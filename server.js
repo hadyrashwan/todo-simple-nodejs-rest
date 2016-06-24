@@ -33,18 +33,32 @@ app.get('/todos/:id', function(req, res) {
 
 app.get('/todos', function(req, res) {
     var queryPram = req.query;
+    validAttributes={}
+    if(queryPram.hasOwnProperty('q') && queryPram.q.trim().length > 0 && _.isString(queryPram.q)){
+    	matchedItems=_.filter(todos,function(todo){
+    		return todo.description.indexOf(queryPram.q) > -1
+    	})
+   		 if(matchedItems.length === 0)
+    	 res.status(404).send("keyword not found so the rest of the pars didn't continue to search on")
+
+    }
    if(!queryPram)
    		return res.json(todos)
     if (queryPram.completed)
-        queryPram.completed = Boolean(queryPram.completed)
+        validAttributes.completed = Boolean(queryPram.completed)
     if (queryPram.id)
-        queryPram.id = parseInt(queryPram.id, 10)
-    matchedItems = _.where(todos, queryPram);
+        validAttributes.id = parseInt(queryPram.id, 10)
+    if(matchedItems.length === 0)
+    	matchedItems=todos
+    matchedItems = _.where(matchedItems, validAttributes);
     if (matchedItems.length > 0) {
         return res.json(matchedItems)
     } else {
         return res.status(404).send("the item wasnt found!")
     }
+
+
+
     console.log("get all todo request  with matched with " + queryPram)
 })
 
