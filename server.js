@@ -3,7 +3,7 @@ var bodyParser = require('body-parser')
 var _ = require('underscore')
 var app = express()
 var PORT = process.env.PORT || 3000
-db=require('./db.js')
+db = require('./db.js')
 app.use(bodyParser.json())
 
 var todos = []
@@ -18,19 +18,23 @@ app.get('/', function(req, res) {
 app.get('/todos/:id', function(req, res) {
 
     todoId = parseInt(req.params.id, 10)
-	db.todo.findById(todoId).then(function(todo){
-		if(todo){
-			console.log(todo.toJSON())
-			res.json(todo)
-		}else{
-			console.log('todo with this id  wasnt found')
-			res.status(404).send();
-		}
+    db.todo.findById(todoId).then(function(todo) {
+        if (todo) {
+            console.log(todo.toJSON())
+            res.json(todo)
+        } else {
+            console.log('todo with this id  wasnt found')
+            res.status(404).send();
+        }
 
-}).catch(function(e){
-	console.log(e);
-	res.status(400).send(e);
-})
+    }, function(e) {
+        console.log(e);
+        res.status(500).send(e);
+
+    }).catch(function(e) {
+        res.status(500).send(e)
+        console.log(e);
+    })
 
 })
 
@@ -38,55 +42,28 @@ app.get('/todos/:id', function(req, res) {
 
 app.get('/todos', function(req, res) {
     var queryPram = req.query;
-   //  validAttributes={}
-   //  if(queryPram.hasOwnProperty('q') && queryPram.q.trim().length > 0 && _.isString(queryPram.q)){
-   //  	matchedItems=_.filter(todos,function(todo){
-   //  		return todo.description.indexOf(queryPram.q) > -1
-   //  	})
-   // 		 if(matchedItems.length === 0)
-   //  	 res.status(404).send("keyword not found so the rest of the pars didn't continue to search on")
+    where = {}
 
-   //  }
-   // if(!queryPram)
-   // 		return res.json(todos)
-   //  if (queryPram.completed)
-   //      validAttributes.completed = Boolean(queryPram.completed)
-   //  if (queryPram.id)
-   //      validAttributes.id = parseInt(queryPram.id, 10)
-   //  if(matchedItems.length === 0)
-   //  	matchedItems=todos
-   //  matchedItems = _.where(matchedItems, validAttributes);
-   //  if (matchedItems.length > 0) {
-   //      return res.json(matchedItems)
-   //  } else {
-   //      return res.status(404).send("the item wasnt found!")
-   //  }
+    if (queryPram.completed && queryPram.completed === "true")
+        where.completed = true;
+    else if (queryPram.completed && queryPram.completed === "false")
+        where.completed = false;
+    if (queryPram.q && queryPram.q.trim().length > 0) {
+        where.description = {
+            $like: "%" + queryPram.q + "%"
+        }
+    }
 
-
-
-   //  console.log("get all todo request  with matched with " + queryPram)
-
-    var queryPram = req.query;
-     validAttributes={
-
-     }
-
-    if (queryPram.completed)
-        validAttributes.completed = Boolean(queryPram.completed)
-    if (queryPram.id)
-        validAttributes.id = parseInt(queryPram.id, 10)
-    if(queryPram.q)
-    	validAttributes.q=q
-
-
-   		 db.todo.findAll({
-			where:{
-				description:{
-					$like:"%3%"
-				}
-			}
-		})
-
+    db.todo.findAll({
+        where: where
+    }).then(function(todos) {
+        if (todos)
+            res.json(todos)
+        else
+            res.status(404).send("no item found")
+    }, function(e) {
+        res.status(500).send(e);
+    })
 })
 
 app.delete('/todos/:id', function(req, res) {
@@ -109,12 +86,12 @@ app.post('/todos', function(req, res) {
     var body = req.body
 
 
-   db.todo.create(body).then(function(){
-		res.send("item has been added ")
-	},function(e){
-		res.status(400).json(e);
-		console.log(e);
-	})
+    db.todo.create(body).then(function() {
+        res.send("item has been added ")
+    }, function(e) {
+        res.status(400).json(e);
+        console.log(e);
+    })
 
 
 })
@@ -146,7 +123,6 @@ app.put('/todos/:id', function(req, res) {
     // _.extend(isFound3, validAttributes)
     // console.log("item with  id : " + isFound3.id + "has been updated")
     // return res.json(isFound3)
-
 
 
 
