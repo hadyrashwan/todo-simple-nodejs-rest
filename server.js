@@ -153,30 +153,17 @@ app.post('/users/login',function(req,res){
     body = _.pick(body, "email", "password")
 
     db.user.authenticate(body).then(function(userData){
-    	res.json(userData.toPublicJson());
-
-    },function(){
+    	var token =userData.generateToken('authentication')
+    	if(token){
+    		res.header('Auth',token).json(userData.toPublicJson());
+    	}else
+    	res.status(500).send();
+	    	//res.json(userData.toPublicJson());
+    },function(e){
+    	console.error(e)
     	res.status(401).send();
 
     })
-
-
-    // db.user.findOne({
-    //     where:{email:body.email}
-    // }).then(function(userData) {
-    //     if (userData){
-        	
-    //     	if(bcrypt.compareSync(body.password,userData.password_hashed))
-    //     		res.json(userData.toPublicJson())
-    //     	else
-    //     		res.status(401).send("Password is incorrect")
-    //     }
-    //     else
-    //         res.status(401).send("no user found")
-    // }, function(e) {
-    //     res.status(500).send(e);
-    // })
-
 	
 })
 
