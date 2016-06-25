@@ -75,9 +75,9 @@ app.delete('/todos/:id', function(req, res) {
             id: todoId2
         }
     }).then(function(numberOfItems) {
-    	  if(numberOfItems ===0)
-    		return res.status(404).send('the id isnt found')
-        res.send(numberOfItems+" items has been  deleted!")
+        if (numberOfItems === 0)
+            return res.status(404).send('the id isnt found')
+        res.send(numberOfItems + " items has been  deleted!")
     }, function(e) {
         console.log(e)
         res.status(404).send(e)
@@ -103,36 +103,35 @@ app.post('/todos', function(req, res) {
 
 
 app.put('/todos/:id', function(req, res) {
-    //var body = req.body
-    //var todoId3 = parseInt(req.params.id, 10)
-    // var isFound3 = _.findWhere(todos, {
-    //     id: todoId3
-    // })
-    // body = _.pick(body, "description", "completed")
-    // validAttributes = {}
-    // if (!isFound3) {
-    //     return res.status(404).send("no match found")
-    // }
-    // if (body.hasOwnProperty("completed") && _.isBoolean(body.completed)) {
-
-    //     validAttributes.completed = body.completed
-    // } else if (body.hasOwnProperty("completed")) {
-    //     return res.status(400).send()
-    // }
-
-    // if (body.hasOwnProperty("description") && _.isString(body.description) && body.description.trim().length > 0) {
-    //     validAttributes.description = body.description
-    // } else if (body.hasOwnProperty('description')) {
-    //     return res.status(400).send()
-    // }
-
-    // _.extend(isFound3, validAttributes)
-    // console.log("item with  id : " + isFound3.id + "has been updated")
-    // return res.json(isFound3)
+    var body = req.body
+    var todoId = parseInt(req.params.id, 10)
 
 
+    body = _.pick(body, "description", "completed")
+    attributes = {}
+
+    if (body.hasOwnProperty("completed"))
+
+        attributes.completed = body.completed
+
+    if (body.hasOwnProperty("description") && _.isString(body.description) && body.description.trim().length > 0)
+        attributes.description = body.description
 
 
+    db.todo.findById(todoId).then(function(todo) {
+
+        if (todo)
+            return todo.update(attributes).then(function(todo) {
+        res.json(todo.toJSON());
+    }, function(e) {
+        res.status(400).send(e);
+    })
+
+        else
+            res.status(404).send();
+    }, function() {
+        res.status(500).send();
+    })
 })
 db.sequelize.sync()
 app.listen(PORT, function() {
