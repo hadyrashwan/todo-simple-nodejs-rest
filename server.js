@@ -4,8 +4,8 @@ var _ = require('underscore')
 var app = express()
 var PORT = process.env.PORT || 3000
 db = require('./db.js')
+middleware=require('./middleware.js')(db)
 app.use(bodyParser.json())
-
 var todos = []
 var todoIdNext = 1
 
@@ -15,7 +15,7 @@ app.get('/', function(req, res) {
 
 })
 
-app.get('/todos/:id', function(req, res) {
+app.get('/todos/:id',middleware.requireAuthentication, function(req, res) { // findy by Id function
 
     todoId = parseInt(req.params.id, 10)
     db.todo.findById(todoId).then(function(todo) {
@@ -28,19 +28,19 @@ app.get('/todos/:id', function(req, res) {
         }
 
     }, function(e) {
-        console.log(e);
+        console.error(e);
         res.status(500).send(e);
 
     }).catch(function(e) {
         res.status(500).send(e)
-        console.log(e);
+        console.error(e);
     })
 
 })
 
 
 
-app.get('/todos', function(req, res) {
+app.get('/todos',middleware.requireAuthentication, function(req, res) { // Search function
     var queryPram = req.query;
     where = {}
 
@@ -66,7 +66,7 @@ app.get('/todos', function(req, res) {
     })
 })
 
-app.delete('/todos/:id', function(req, res) {
+app.delete('/todos/:id', function(req, res) { // del by Id function
     var todoId2 = parseInt(req.params.id, 10)
 
 
@@ -87,7 +87,7 @@ app.delete('/todos/:id', function(req, res) {
     })
 })
 
-app.post('/todos', function(req, res) {
+app.post('/todos', function(req, res) { // add todo function
     var body = req.body
     body = _.pick(body, "description", "completed")
 
@@ -102,7 +102,7 @@ app.post('/todos', function(req, res) {
 })
 
 
-app.put('/todos/:id', function(req, res) {
+app.put('/todos/:id',middleware.requireAuthentication  ,middleware.requireAuthentication, function(req, res) { // update function
     var body = req.body
     var todoId = parseInt(req.params.id, 10)
 
@@ -134,7 +134,7 @@ app.put('/todos/:id', function(req, res) {
     })
 })
 
-app.post('/users',function(req,res){
+app.post('/users',function(req,res){ // create account function
 	var body = req.body
     body = _.pick(body, "email", "password")
 
@@ -148,7 +148,7 @@ app.post('/users',function(req,res){
 })
 
 
-app.post('/users/login',function(req,res){
+app.post('/users/login',function(req,res){ // login function
 	var body = req.body
     body = _.pick(body, "email", "password")
 

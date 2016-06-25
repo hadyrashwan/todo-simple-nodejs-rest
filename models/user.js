@@ -46,6 +46,7 @@ module.exports = function(sequelize, DataTypes) {
             }
         },
         classMethods: {
+
             authenticate: function(body) {
                 return new Promise(function(reslove, reject) {
 
@@ -70,16 +71,34 @@ module.exports = function(sequelize, DataTypes) {
                         return reject();
                     })
                 })
-            }
+            },
+            findByToken:function(token){
+                return new Promise(function(reslove,reject){
+                    try{
+                        var decodedJWT=jwt.verify(token,"qweryty098")
+                        var bytes =cryptojs.AES.decrypt(decodedJWT.token,"abc123!@#!")
+                        var tokenData =JSON.parse(bytes.toString(cryptojs.enc.Utf8))
+                        user.findById(tokenData.id).then(function(user){
+                            if(user)
+                                reslove(user)
+                            reject();
+                        },function(e){
+                            reject();
+
+                        })
+                    }catch(e){
+                        console.error(e);
+                        reject();
+                    }
+                })
+            } 
         },
         instanceMethods: {
             toPublicJson: function() {
-                console.log('passed here toPublicJson')
                 var json = this.toJSON()
                 return _.pick(json, "email", "updatedAt", "createdAt")
             },
             generateToken:function(type){
-            	console.log("inside the gen token function")
             	if(!_.isString(type)){
             		return undefined
             	}
