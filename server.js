@@ -147,6 +147,39 @@ app.post('/users',function(req,res){
 
 })
 
+
+app.post('/users/login',function(req,res){
+	var body = req.body
+    body = _.pick(body, "email", "password")
+
+    db.user.authenticate(body).then(function(userData){
+    	res.json(userData.toPublicJson());
+
+    },function(){
+    	res.status(401).send();
+
+    })
+
+
+    // db.user.findOne({
+    //     where:{email:body.email}
+    // }).then(function(userData) {
+    //     if (userData){
+        	
+    //     	if(bcrypt.compareSync(body.password,userData.password_hashed))
+    //     		res.json(userData.toPublicJson())
+    //     	else
+    //     		res.status(401).send("Password is incorrect")
+    //     }
+    //     else
+    //         res.status(401).send("no user found")
+    // }, function(e) {
+    //     res.status(500).send(e);
+    // })
+
+	
+})
+
 db.sequelize.sync()
 app.listen(PORT, function() {
     console.log('running on port : ', PORT)
