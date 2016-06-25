@@ -89,7 +89,7 @@ app.delete('/todos/:id', function(req, res) {
 
 app.post('/todos', function(req, res) {
     var body = req.body
-
+    body = _.pick(body, "description", "completed")
 
     db.todo.create(body).then(function() {
         res.send("item has been added ")
@@ -133,6 +133,20 @@ app.put('/todos/:id', function(req, res) {
         res.status(500).send();
     })
 })
+
+app.post('/users',function(req,res){
+	var body = req.body
+    body = _.pick(body, "email", "password")
+
+    db.user.create(body).then(function(newUser) {
+        res.json(newUser.toJSON())
+    }, function(e) {
+        res.status(400).json(e);
+        console.log(e);
+    })
+
+})
+
 db.sequelize.sync()
 app.listen(PORT, function() {
     console.log('running on port : ', PORT)
