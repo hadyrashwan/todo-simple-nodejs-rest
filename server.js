@@ -137,7 +137,6 @@ app.put('/todos/:id', middleware.requireAuthentication, function(req, res) { // 
 app.post('/users', function(req, res) { // create account function
     var body = req.body
     body = _.pick(body, "email", "password")
-
     db.user.create(body).then(function(newUser) {
         res.json(newUser.toPublicJson())
     }, function(e) {
@@ -151,6 +150,8 @@ app.post('/users', function(req, res) { // create account function
 app.post('/users/login', function(req, res) { // login function
     var body = req.body
     body = _.pick(body, "email", "password")
+    body.email=body.email.toLowerCase()
+
 
     db.user.authenticate(body).then(function(userData) {
         token = userData.generateToken('authentication')
@@ -160,7 +161,6 @@ app.post('/users/login', function(req, res) { // login function
             res.status(500).send();
         //res.json(userData.toPublicJson());
     }, function(e) {
-        console.error(e)
         res.status(401).send();
 
     })
