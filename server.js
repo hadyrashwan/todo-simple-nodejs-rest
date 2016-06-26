@@ -87,22 +87,27 @@ app.delete('/todos/:id', function(req, res) { // del by Id function
     })
 })
 
-app.post('/todos', function(req, res) { // add todo function
+app.post('/todos',middleware.requireAuthentication, function(req, res) { // add todo function
     var body = req.body
     body = _.pick(body, "description", "completed")
 
-    db.todo.create(body).then(function() {
-        res.send("item has been added ")
-    }, function(e) {
+
+    db.todo.create(body).then(function(todo) {
+    	req.user.addTodo(todo).then(function(){
+    		console.log("im in")
+    		return todo.reload();
+    	}).then(function(todo){
+    		res.send(todo.toJSON())
+    	})
+    }, function() {
         res.status(400).json(e);
-        console.log(e);
     })
 
 
 })
 
 
-app.put('/todos/:id',middleware.requireAuthentication  ,middleware.requireAuthentication, function(req, res) { // update function
+app.put('/todos/:id',middleware.requireAuthentication, function(req, res) { // update function
     var body = req.body
     var todoId = parseInt(req.params.id, 10)
 
@@ -153,7 +158,7 @@ app.post('/users/login',function(req,res){ // login function
     body = _.pick(body, "email", "password")
 
     db.user.authenticate(body).then(function(userData){
-    	var token =userData.generateToken('authentication')
+    	 token =userData.generateToken('authentication')
     	if(token){
     		res.header('Auth',token).json(userData.toPublicJson());
     	}else
@@ -167,7 +172,9 @@ app.post('/users/login',function(req,res){ // login function
 	
 })
 
-db.sequelize.sync()
+db.sequelize.sync(
+	{force:true}
+	)
 app.listen(PORT, function() {
     console.log('running on port : ', PORT)
 })

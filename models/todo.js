@@ -1,6 +1,6 @@
 module.exports = function(sequelize, DataTypes) {
     // body...
-    return sequelize.define('/todo', {
+    return sequelize.define('todo', {
         description: {
             type: DataTypes.STRING,
             allowNull: false,

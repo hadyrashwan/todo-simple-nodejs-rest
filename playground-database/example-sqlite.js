@@ -4,7 +4,7 @@ var sequelize= new Sequelize(undefined,undefined,undefined,{
 	'storage':__dirname+'/basic-sqllite-db.sqlite'
 })
 
-var Todo=sequelize.define('todo',{
+var Todo345=sequelize.define('todo',{
 	description:{
 		type:Sequelize.STRING,
 		allowNull:false,
@@ -19,43 +19,47 @@ var Todo=sequelize.define('todo',{
 	}
 })
 
-sequelize.sync().then(function () {
+
+var User=sequelize.define('/user',{
+	email:Sequelize.STRING,
+})
+
+
+Todo345.belongsTo(User)
+User.hasMany(Todo345)
+
+sequelize.sync({
+	force:true
+}).then(function () {
 	// body...
 	console.log('Everthing is synced and working !')
 
 
-	Todo.findById(8).then(function(todo){
-		if(todo){
-			console.log(todo.toJSON())
-		}else{
-			console.log('todo with id 1 wasnt found')
-		}
+
+// User.findById(1).then(function(user){
+// 	user.getTodos({
+// 		where:{completed:true}
+// 	}).then(function(todos){
+// 		todos.forEach(function(todo){
+// 			console.log(todo.toJSON())
+// 		})
+// 	})
+// })
+
+
+
+	User.create({
+	email:'email 1',
+}).then(function(){
+	return Todo345.create({
+		description:"clean ur *"
 	})
-	// Todo.create({
-	// 	description:'hey 3',
-	// 	completed:false
-	// }).then(function(todo){
-	// 	return Todo.create({
-	// 		description:"another description"
-	// 	})
-	// }).then(function(){
-	// 	return Todo.findAll({
-	// 		where:{
-	// 			description:{
-	// 				$like:"%3%"
-	// 			}
-	// 		}
-	// 	})
-	// }).then(function(todoFounds){
-	// 	if(todoFounds){
-	// 		todoFounds.forEach(function(todo){
-	// 			console.log(todo.toJSON())
-	// 		})
-	// 	}else{
-	// 		console.log('item with this id isnt found ')
-	// 	}
-		
-	// }).catch(function(e){
-	// 	console.log(e);
-	// })
+}).then(function(todo){
+	User.findById(1).then(function(user){  /// the matched user id will be returned I think with findOne
+		user.addTodo(todo);
+	})
 })
+
+
+})
+

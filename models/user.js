@@ -5,7 +5,7 @@ var jwt = require('jsonwebtoken')
 
 module.exports = function(sequelize, DataTypes) {
     // body...
-    var user = sequelize.define('/user', {
+    var user = sequelize.define('user', {
         email: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -75,7 +75,7 @@ module.exports = function(sequelize, DataTypes) {
             findByToken:function(token){
                 return new Promise(function(reslove,reject){
                     try{
-                        var decodedJWT=jwt.verify(token,"qweryty098")
+                        var decodedJWT=jwt.verify(token,'qweryty098')
                         var bytes =cryptojs.AES.decrypt(decodedJWT.token,"abc123!@#!")
                         var tokenData =JSON.parse(bytes.toString(cryptojs.enc.Utf8))
                         user.findById(tokenData.id).then(function(user){
